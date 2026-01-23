@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>skyt x lab Virtual Lab</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",sans-serif}
+body{
+ background:radial-gradient(circle at top,#0a1f2e,#02060a);
+ color:white;overflow-x:hidden;
+}
+nav{
+ position:fixed;top:0;width:100%;
+ display:flex;justify-content:space-between;
+ padding:20px 40px;
+ backdrop-filter:blur(18px);
+ background:rgba(255,255,255,.08);
+ z-index:100;
+}
+nav a{color:white;text-decoration:none;margin:0 15px;font-weight:600}
+section{padding:120px 7%}
+.glass{
+ background:rgba(255,255,255,.12);
+ backdrop-filter:blur(20px);
+ border-radius:22px;
+ padding:25px;
+ box-shadow:0 0 40px rgba(0,255,255,.18);
+}
+h1,h2,h3{margin-bottom:10px}
+button,select{
+ width:100%;padding:10px;margin-top:10px;
+ border:none;border-radius:10px;
+ background:rgba(0,255,255,.35);
+ color:white;cursor:pointer;
+}
+.grid{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(50px,1fr));
+ gap:8px;
+}
+.element{
+ padding:8px;
+ text-align:center;
+ border-radius:8px;
+ font-size:13px;
+ background:rgba(255,255,255,.15);
+ cursor:pointer;
+}
+.element:hover{background:rgba(0,255,255,.45)}
+.selected{outline:2px solid cyan}
+canvas{
+ width:100%;height:260px;
+ background:rgba(0,0,0,.45);
+ border-radius:15px;
+ margin-top:15px;
+ box-shadow:0 0 25px rgba(0,255,255,.6);
+}
+
+/* bubbles */
+.bubble{
+ position:fixed;bottom:-100px;
+ background:rgba(255,255,255,.12);
+ border-radius:50%;
+ animation:rise linear infinite;
+}
+@keyframes rise{to{transform:translateY(-120vh)}}
+</style>
+</head>
+
+<body>
+
+<script>
+for(let i=0;i<40;i++){
+ let b=document.createElement("div");
+ b.className="bubble";
+ let s=20+Math.random()*60;
+ b.style.width=b.style.height=s+"px";
+ b.style.left=Math.random()*100+"vw";
+ b.style.animationDuration=10+Math.random()*30+"s";
+ document.body.appendChild(b);
+}
+</script>
+
+<nav>
+<strong>skyt x Lab</strong>
+<div>
+<a href="#home">Home</a>
+<a href="#about">About</a>
+<a href="#lab">Simulator</a>
+</div>
+</nav>
+
+<section id="home">
+<div class="glass">
+<h1>skyt x lab Virtual Laboratory</h1>
+<p>
+A beautifully designed futuristic science lab where you can explore
+realistic chemistry reactions and biological specimens interactively.
+</p>
+</div>
+</section>
+
+<section id="about">
+<div class="glass">
+<h2>About</h2>
+<p>
+skyt x Lab is an educational virtual platform that combines
+a full periodic table reaction engine with a microscope simulator,
+allowing students to safely visualize scientific concepts.This website is created by shakthi krishna
+</p>
+</div>
+</section>
+
+<section id="lab">
+<h1>🔬 Science Simulator</h1>
+
+<div class="glass">
+<h2>🧪 Chemistry — Full Periodic Table</h2>
+<p>Select any two elements:</p>
+
+<div id="ptable" class="grid"></div>
+<button onclick="react()">React Elements</button>
+<div id="chemResult"></div>
+<canvas id="chemCanvas"></canvas>
+</div>
+
+<br>
+
+<div class="glass">
+<h2>🧬 Biology — Microscope Simulator</h2>
+<select id="specimen" onchange="drawSpecimen()">
+<option value="amoeba">Amoeba</option>
+<option value="paramecium">Paramecium</option>
+<option value="euglena">Euglena</option>
+<option value="cocci">Bacteria (Cocci)</option>
+<option value="bacilli">Bacteria (Bacilli)</option>
+<option value="rbc">Red Blood Cells</option>
+<option value="wbc">White Blood Cells</option>
+<option value="yeast">Yeast</option>
+<option value="algae">Spirogyra</option>
+<option value="virus">Virus</option>
+</select>
+<canvas id="bioCanvas"></canvas>
+</div>
+</section>
+
+<script>
+/* ===== PERIODIC TABLE (118 ELEMENTS) ===== */
+const elements = [
+"H","He","Li","Be","B","C","N","O","F","Ne",
+"Na","Mg","Al","Si","P","S","Cl","Ar",
+"K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn",
+"Ga","Ge","As","Se","Br","Kr",
+"Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd",
+"In","Sn","Sb","Te","I","Xe",
+"Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy",
+"Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg",
+"Tl","Pb","Bi","Po","At","Rn",
+"Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr",
+"Rf","Db","Sg","Bh","Hs","Mt","Ds","Rg","Cn","Nh","Fl","Mc","Lv","Ts","Og"
+];
+
+const metals=["Li","Na","K","Rb","Cs","Fr","Mg","Ca","Fe","Cu","Zn","Ag","Au"];
+const nonmetals=["O","Cl","F","S","Br","I","N"];
+const noble=["He","Ne","Ar","Kr","Xe","Rn","Og"];
+
+let selected=[];
+const ptable=document.getElementById("ptable");
+
+elements.forEach(el=>{
+ let d=document.createElement("div");
+ d.className="element";
+ d.innerText=el;
+ d.onclick=()=>{
+  if(selected.length<2){
+   selected.push(el);
+   d.classList.add("selected");
+  }
+ };
+ ptable.appendChild(d);
+});
+
+/* ===== CHEMISTRY ENGINE ===== */
+const chem=document.getElementById("chemCanvas");
+const ctx=chem.getContext("2d");
+chem.width=500;chem.height=260;
+
+function react(){
+ ctx.clearRect(0,0,500,260);
+ let r=document.getElementById("chemResult");
+ if(selected.length<2){r.innerText="Select two elements.";return;}
+ let [a,b]=selected;
+
+ if(noble.includes(a)||noble.includes(b)){
+  r.innerText="No Reaction (Noble Gas)";
+ }else if(metals.includes(a)&&nonmetals.includes(b)||metals.includes(b)&&nonmetals.includes(a)){
+  r.innerText="Ionic Compound Formed ⚡";
+  flame();
+ }else if((a==="Na"||a==="K")&&(b==="H")||(b==="Na"||b==="K")){
+  r.innerText="Violent Reaction 💥";
+  explosion();
+ }else{
+  r.innerText="Weak Interaction";
+  bubbles();
+ }
+
+ selected=[];
+ document.querySelectorAll(".element").forEach(e=>e.classList.remove("selected"));
+}
+
+function flame(){
+ let y=220;
+ let i=setInterval(()=>{
+  ctx.clearRect(0,0,500,260);
+  ctx.fillStyle="orange";
+  ctx.beginPath();
+  ctx.arc(250,y,35,0,Math.PI*2);
+  ctx.fill();
+  y-=6;if(y<80)clearInterval(i);
+ },30);
+}
+function explosion(){
+ for(let i=0;i<60;i++){
+  ctx.beginPath();
+  ctx.arc(250+Math.random()*120-60,130+Math.random()*120-60,5,0,Math.PI*2);
+  ctx.fillStyle="red";
+  ctx.fill();
+ }
+}
+function bubbles(){
+ let i=0;
+ let anim=setInterval(()=>{
+  ctx.clearRect(0,0,500,260);
+  ctx.beginPath();
+  ctx.arc(250,200-i,10,0,Math.PI*2);
+  ctx.fillStyle="cyan";
+  ctx.fill();
+  i+=5;if(i>150)clearInterval(anim);
+ },40);
+}
+
+/* ===== BIOLOGY MICROSCOPE ===== */
+const bio=document.getElementById("bioCanvas");
+const bctx=bio.getContext("2d");
+bio.width=500;bio.height=260;
+
+function drawSpecimen(){
+ bctx.clearRect(0,0,500,260);
+ bctx.fillStyle="rgba(0,255,255,.8)";
+ let s=specimen.value;
+
+ if(s==="amoeba"){
+  bctx.beginPath();
+  bctx.arc(250,130,60,0,Math.PI*2);
+  bctx.fill();
+ }
+ if(s==="paramecium"){
+  bctx.beginPath();
+  bctx.ellipse(250,130,80,30,0,0,Math.PI*2);
+  bctx.fill();
+ }
+ if(s==="euglena"){
+  bctx.beginPath();
+  bctx.ellipse(250,130,70,25,0,0,Math.PI*2);
+  bctx.fill();
+ }
+ if(s==="cocci"){
+  for(let i=0;i<20;i++){
+   bctx.beginPath();
+   bctx.arc(200+Math.random()*100,100+Math.random()*80,6,0,Math.PI*2);
+   bctx.fill();
+  }
+ }
+ if(s==="bacilli"){
+  for(let i=0;i<15;i++){
+   bctx.fillRect(200+Math.random()*80,100+Math.random()*80,12,5);
+  }
+ }
+ if(s==="rbc"){
+  for(let i=0;i<12;i++){
+   bctx.beginPath();
+   bctx.arc(200+Math.random()*100,100+Math.random()*80,12,0,Math.PI*2);
+   bctx.stroke();
+  }
+ }
+ if(s==="wbc"){
+  bctx.beginPath();
+  bctx.arc(250,130,40,0,Math.PI*2);
+  bctx.fillStyle="purple";
+  bctx.fill();
+ }
+ if(s==="yeast"){
+  bctx.beginPath();
+  bctx.arc(240,130,30,0,Math.PI*2);
+  bctx.arc(280,120,18,0,Math.PI*2);
+  bctx.fill();
+ }
+ if(s==="algae"){
+  for(let i=0;i<8;i++){
+   bctx.strokeStyle="green";
+   bctx.beginPath();
+   bctx.arc(250,130,20+i*10,0,Math.PI);
+   bctx.stroke();
+  }
+ }
+ if(s==="virus"){
+  bctx.beginPath();
+  bctx.arc(250,80,20,0,Math.PI*2);
+  bctx.fill();
+  for(let i=0;i<6;i++)
+   bctx.fillRect(245+i*2,100,3,50);
+ }
+}
+drawSpecimen();
+</script>
+
+</body>
+</html>

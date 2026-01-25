@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skyt X Lab</title>
+<style>
+/* ==== Global Styles ==== */
+body, html {
+  margin:0; padding:0; font-family:Arial,sans-serif;
+  background:#111; color:#fff; overflow-x:hidden; scroll-behavior:smooth;
+}
+nav {
+  width:100%; padding:15px 50px; display:flex; justify-content:space-between; align-items:center;
+  background:rgba(0,0,0,0.8); position:fixed; top:0; z-index:1000;
+}
+nav h1 { color:#0ff; }
+nav ul { list-style:none; display:flex; gap:30px; }
+nav ul li a { color:#ccc; text-decoration:none; font-weight:bold; transition:0.3s; }
+nav ul li a:hover { color:#0ff; text-shadow:0 0 10px #0ff; transform:scale(1.1); }
+
+/* ==== Sections ==== */
+section { padding:100px 50px; text-align:center; position:relative; }
+.hero { height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding-top:80px; z-index:1; }
+.hero h2 { font-size:48px; color:#0ff; margin-bottom:20px; }
+.hero p { font-size:20px; max-width:700px; line-height:1.6; color:#ccc; }
+.button { margin-top:30px; padding:15px 40px; font-size:18px; font-weight:bold; border:2px solid #0ff; background:transparent; color:#0ff; cursor:pointer; border-radius:8px; transition:0.3s; }
+.button:hover { background:#0ff; color:#111; box-shadow:0 0 20px #0ff,0 0 40px #0ff; }
+
+.about { background:#222; }
+.about h2 { font-size:36px; margin-bottom:20px; color:#0ff; }
+.about p { max-width:800px; margin:0 auto; line-height:1.6; color:#ccc; }
+
+.experiments { background:#111; }
+.experiments h2 { font-size:36px; margin-bottom:20px; color:#0ff; }
+.experiments ul { list-style:none; padding:0; max-width:400px; margin:0 auto; }
+.experiments ul li { margin:15px 0; }
+.experiments ul li a { color:#ccc; font-size:20px; text-decoration:none; transition:0.3s; }
+.experiments ul li a:hover { color:#0ff; text-shadow:0 0 10px #0ff; }
+
+footer { background:#222; padding:20px; text-align:center; border-top:2px solid #0ff; color:#ccc; font-size:14px; }
+
+/* ==== Titration Styles ==== */
+#instructions { position:absolute; top:10px; left:10px; width:480px; background:rgba(0,0,0,0.7); padding:15px; border-radius:10px; font-size:16px; line-height:1.5; border:2px solid #0ff; z-index:10; }
+#phMeter { position:absolute; top:10px; left:510px; width:200px; background:rgba(0,0,0,0.7); padding:10px; border-radius:8px; font-size:16px; text-align:center; border:2px solid #ff0; z-index:10; }
+#nextStepBtn { position:absolute; top:10px; right:10px; padding:8px 12px; font-size:14px; border:none; background:#0ff; color:#000; border-radius:6px; cursor:pointer; font-weight:bold; box-shadow:0 0 10px #0ff; z-index:10; }
+#nextStepBtn:hover { background:#0cc; }
+canvas { display:block; z-index:1; }
+
+/* ==== Responsive ==== */
+@media(max-width:768px){
+  #instructions, #phMeter { width:90%; left:5%; top:auto; bottom:10px; }
+  #phMeter { left:calc(5% + 220px); }
+  #nextStepBtn { top:auto; bottom:10px; right:10px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<nav>
+  <h1>Skyt X Lab</h1>
+  <ul>
+    <li><a href="#home">Home</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#experiments">Experiments</a></li>
+  </ul>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero" id="home">
+  <h2>Welcome to Skyt X Lab</h2>
+  <p>Explore a futuristic virtual chemistry lab. Conduct experiments safely and interactively while learning real-world chemical reactions in an immersive environment.</p>
+  <button class="button" onclick="document.getElementById('experiments').scrollIntoView({behavior:'smooth'});">View Experiments</button>
+</section>
+
+<!-- About Section -->
+<section class="about" id="about">
+  <h2>About Skyt X Lab</h2>
+  <p>Skyt X Lab is an innovative virtual chemistry lab created by <b>Shakthi Krishna</b>. This platform allows students to simulate titrations, observe reactions, and interact with chemical processes safely, enhancing practical learning without needing a physical lab. Built for futuristic learning, the lab environment is immersive, engaging, and designed for 21st-century science education.</p>
+</section>
+
+<!-- Experiments Section -->
+<section class="experiments" id="experiments">
+  <h2>Available Experiments</h2>
+  <ul>
+    <li><a href="#titration">🔹 Titration Experiment</a></li>
+  </ul>
+</section>
+
+<!-- Titration Simulation -->
+<section id="titration" style="height:800px; position:relative;">
+  <canvas id="labCanvas"></canvas>
+  <div id="instructions">
+    <b>Step 1:</b> Drag the <b>Beaker</b> (HCl + Phenolphthalein) under the <b>Burette</b> (NaOH).<br>
+    Click "Next Step" to start titration.
+  </div>
+  <div id="phMeter">pH: 1.0</div>
+  <button id="nextStepBtn">Next Step</button>
+</section>
+
+<footer>
+  <p>&copy; 2026 Skyt X Lab | Created by Shakthi Krishna | All Rights Reserved</p>
+</footer>
+
+<script>
+// ==== Bubble Background ====
+const canvasBG = document.getElementById('bgCanvas');
+const ctxBG = canvasBG.getContext('2d');
+canvasBG.width = window.innerWidth;
+canvasBG.height = window.innerHeight;
+const bubbles = [];
+for(let i=0;i<100;i++){
+  bubbles.push({x:Math.random()*canvasBG.width, y:Math.random()*canvasBG.height, r:Math.random()*8+2, dy:Math.random()*1+0.5, alpha:Math.random()*0.5+0.2});
+}
+function animateBubbles(){
+  ctxBG.clearRect(0,0,canvasBG.width,canvasBG.height);
+  bubbles.forEach(b=>{
+    ctxBG.beginPath();
+    ctxBG.arc(b.x,b.y,b.r,0,Math.PI*2);
+    ctxBG.fillStyle = `rgba(0,255,255,${b.alpha})`;
+    ctxBG.fill();
+    b.y -= b.dy;
+    if(b.y < -b.r) b.y = canvasBG.height + b.r;
+  });
+  requestAnimationFrame(animateBubbles);
+}
+animateBubbles();
+window.addEventListener('resize', ()=>{
+  canvasBG.width = window.innerWidth;
+  canvasBG.height = window.innerHeight;
+});
+
+// ==== Titration Lab ====
+const canvasLab = document.getElementById('labCanvas');
+const ctx = canvasLab.getContext('2d');
+canvasLab.width = window.innerWidth;
+canvasLab.height = 600;
+
+// Table
+const table = { x: canvasLab.width/2-225, y:canvasLab.height-150, width:450, height:150 };
+
+// Equipment Class
+class Equipment {
+  constructor(name,color,x,y,w,h){
+    this.name=name; this.color=color; this.x=x; this.y=y; this.w=w; this.h=h; this.dragging=false;
+  }
+  draw(){
+    ctx.fillStyle=this.color;
+    ctx.shadowColor='#0ff';
+    ctx.shadowBlur=15;
+    ctx.fillRect(this.x,this.y,this.w,this.h);
+    ctx.shadowBlur=0;
+    ctx.fillStyle="#fff";
+    ctx.font="14px Arial";
+    ctx.fillText(this.name,this.x+5,this.y+this.h/2+5);
+  }
+  isInside(mx,my){ return mx>this.x && mx<this.x+this.w && my>this.y && my<this.y+this.h; }
+}
+
+// Equipment
+const beaker = new Equipment('Beaker (HCl + Phenolphthalein)','#f00',50,table.y-100,70,110);
+const burette = new Equipment('Burette (NaOH)','#00f',canvasLab.width-180,table.y-300,35,220);
+
+// Liquids
+let acid={color:'#f00',level:60,max:80};
+let base={color:'#00f',level:120,max:120};
+
+// Dragging
+let dragging=null;
+canvasLab.addEventListener('mousedown',e=>{
+  const mx=e.clientX, my=e.clientY;
+  if(beaker.isInside(mx,my)){dragging=beaker; dragging.dragging=true;}
+});
+canvasLab.addEventListener('mousemove',e=>{
+  if(dragging){dragging.x=e.clientX-dragging.w/2; dragging.y=e.clientY-dragging.h/2;}
+});
+canvasLab.addEventListener('mouseup',()=>{ if(dragging) dragging.dragging=false; dragging=null; });
+
+// Steps
+let step=1;
+const instructions=document.getElementById('instructions');
+const phMeter=document.getElementById('phMeter');
+document.getElementById('nextStepBtn').addEventListener('click',()=>{
+  switch(step){
+    case 1: instructions.innerHTML=`<b>Step 2:</b> Click on the <b>Burette</b> to add NaOH drops to the beaker. Watch the solution and pH.`; step++; break;
+    case 2: instructions.innerHTML=`<b>Step 3:</b> Keep adding drops until solution turns light pink (endpoint).`; step++; break;
+    default: instructions.innerHTML=`Titration complete! Reaction: HCl + NaOH → NaCl + H₂O.`; break;
+  }
+});
+
+// Add drops
+canvasLab.addEventListener('click',e=>{
+  if(step>=2 && base.level>0){
+    const x=e.clientX, y=e.clientY;
+    if(x>burette.x && x<burette.x+burette.w && y>burette.y && y<burette.y+burette.h){
+      base.level-=0.5; acid.level+=0.5;
+      let ratio=acid.level/(acid.max+base.max);
+      let r=255, g=Math.round(23+200*ratio), b=Math.round(68+150*ratio);
+      acid.color=`rgb(${r},${g},${b})`;
+      let ph=1+13*ratio; if(ph>14) ph=14; phMeter.innerHTML=`pH: ${ph.toFixed(1)}`;
+      if(ratio>=0.9) instructions.innerHTML=`<b>Step 4:</b> Endpoint reached! Light pink color indicates reaction complete: HCl + NaOH → NaCl + H₂O`;
+    }
+  }
+});
+
+// Draw Loop
+let swirl=0;
+function draw(){
+  ctx.clearRect(0,0,canvasLab.width,canvasLab.height);
+  ctx.fillStyle='#0ff'; ctx.globalAlpha=0.1;
+  ctx.fillRect(table.x,table.y,table.width,table.height); ctx.globalAlpha=1;
+  beaker.draw(); burette.draw();
+
+  // Acid in beaker
+  ctx.save(); ctx.translate(beaker.x,beaker.y);
+  ctx.fillStyle=acid.color; ctx.shadowColor='#f00'; ctx.shadowBlur=10;
+  ctx.fillRect(5+Math.sin(swirl)*3,beaker.h-acid.level-5,beaker.w-10,acid.level);
+  ctx.shadowBlur=0; ctx.restore();
+
+  // Base in burette
+  ctx.fillStyle=base.color; ctx.shadowColor='#00f'; ctx.shadowBlur=10;
+  ctx.fillRect(burette.x+5,burette.y+burette.h-base.level,burette.w-10,base.level);
+  ctx.shadowBlur=0;
+
+  swirl+=0.1;
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+
+</body>
+</html>

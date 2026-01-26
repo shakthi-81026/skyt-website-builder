@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Skyt Futuristic Website Builder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --primary:#00ffcc;
+  --accent:#ff00ff;
+  --bg:#111;
+  --font:'Poppins', sans-serif;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:var(--font);}
+body{background:var(--bg);color:#fff;}
+.hidden{display:none;}
+
+/* HEADER */
+header{
+  background:linear-gradient(90deg,#000,#111);
+  padding:20px 50px;
+  display:flex;justify-content:space-between;align-items:center;
+  box-shadow:0 0 30px #00ffcc33;
+}
+header h2{color:var(--primary);}
+nav a, nav button{
+  margin-left:20px;background:none;border:none;font-size:16px;color:#fff;cursor:pointer;transition:0.3s;
+}
+nav a:hover, nav button:hover{color:var(--primary);}
+nav button{color:var(--accent);}
+
+/* SECTIONS */
+section{padding:80px 10%;}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center;}
+.hero h2{font-size:48px;color:var(--primary);}
+.hero p{font-size:18px;color:#aaa;}
+.hero img{width:100%;border-radius:20px;box-shadow:0 0 30px #00ffcc33;}
+
+.box{background:#222;padding:40px;border-radius:20px;box-shadow:0 0 20px #ff00ff33;}
+footer{text-align:center;padding:20px;font-size:12px;color:#888;}
+
+/* BUILDER */
+#builderHeader{
+  background:#000;color:var(--primary);padding:15px 40px;
+  display:flex;justify-content:space-between;align-items:center;
+  box-shadow:0 0 20px #00ffcc33;
+}
+
+#sidebar{
+  position:fixed;left:0;top:60px;width:300px;height:100%;
+  background:#111;padding:20px;box-shadow:5px 0 30px #00ffcc33;overflow:auto;color:#fff;
+}
+#sidebar h4{margin-top:20px;color:var(--primary);}
+#sidebar button,#sidebar input,#sidebar select{
+  width:100%;margin-top:8px;padding:10px;border-radius:8px;border:none;background:#222;color:#fff;cursor:pointer;transition:0.3s;font-weight:bold;
+}
+#sidebar button:hover,#sidebar select:hover,#sidebar input:hover{background:var(--primary);color:#000;}
+
+#exportButton{
+  background:linear-gradient(45deg,#00ffcc,#ff00ff);
+  color:#000;font-size:18px;margin-bottom:20px;
+  padding:12px;border-radius:12px;text-transform:uppercase;letter-spacing:1px;
+  box-shadow:0 0 20px #00ffcc,0 0 40px #ff00ff;transition:0.3s;
+}
+#exportButton:hover{box-shadow:0 0 30px #00ffcc,0 0 60px #ff00ff;transform:scale(1.05);}
+
+#editor{margin-left:320px;padding:40px;}
+.builder-section{
+  border:2px dashed #555;padding:25px;margin-bottom:30px;background:#1a1a1a;
+  position:relative;border-radius:12px;
+}
+.builder-section .delete{
+  position:absolute;top:10px;right:10px;background:#ff4d4d;color:#fff;border:none;padding:5px 10px;cursor:pointer;border-radius:6px;
+}
+.edit{cursor:text;}
+.selected{outline:3px solid var(--primary);}
+.edit-img,.edit-video,.edit-audio,.edit-button{max-width:100%;margin-top:15px;cursor:pointer;display:block;}
+.align-box{display:flex;gap:5px;margin-top:8px;}
+.align-box button{flex:1;}
+
+/* DISCLAIMER */
+#disclaimerModal{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.8);
+  display:flex;justify-content:center;align-items:center;z-index:1000;
+}
+#disclaimerModal .content{
+  background:#111;padding:30px;border-radius:15px;width:90%;max-width:500px;text-align:center;
+  box-shadow:0 0 20px #00ffcc33;
+}
+#disclaimerModal button{
+  background:var(--primary);color:#000;border:none;padding:10px 20px;margin-top:15px;
+  cursor:pointer;border-radius:10px;font-weight:bold;
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  #sidebar{position:relative;width:100%;} #editor{margin-left:0;} .hero{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- MAIN SITE -->
+<div id="mainSite">
+<header>
+<h2>Skyt Futuristic Builder</h2>
+<nav>
+<a onclick="showMain('home')">Home</a>
+<a onclick="showMain('about')">About</a>
+<button onclick="openBuilder()">Website Builder</button>
+</nav>
+</header>
+
+<section id="home">
+<div class="hero">
+<div>
+<h2>Futuristic Websites</h2>
+<p>Create interactive pages easily.</p>
+</div>
+<img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f">
+</div>
+</section>
+
+<section id="about" class="hidden">
+<div class="box">
+<h2>About Us</h2>
+<p>Fully frontend-based builder. Add text, buttons, images, audio, video. Developed by Skyt.</p>
+</div>
+</section>
+
+<footer>
+© 2026 Skyt Builder <br>
+<span style="font-size:10px;color:#888">Educational purposes only.</span>
+</footer>
+</div>
+
+<!-- BUILDER -->
+<div id="builder" class="hidden">
+<div id="builderHeader">
+<h3>Website Builder</h3>
+<button onclick="exitBuilder()">Exit</button>
+</div>
+
+<div id="sidebar">
+<!-- BIG EXPORT BUTTON -->
+<button id="exportButton" onclick="exportSite()">EXPORT</button>
+
+<select onchange="switchPage(this.value)">
+<option value="home">Home Page</option>
+<option value="about">About Page</option>
+<option value="contact">Contact Page</option>
+</select>
+
+<h4>Text</h4>
+<input type="color" onchange="setTextColor(this.value)">
+<select onchange="setFont(this.value)">
+<option>Arial</option>
+<option>Poppins</option>
+<option>Georgia</option>
+</select>
+<input type="number" placeholder="Font size (px)" onchange="setFontSize(this.value)">
+
+<div class="align-box">
+<button onclick="setTextAlign('left')">Left</button>
+<button onclick="setTextAlign('center')">Center</button>
+<button onclick="setTextAlign('right')">Right</button>
+</div>
+
+<h4>Image</h4>
+<div class="align-box">
+<button onclick="setImageAlign('left')">Left</button>
+<button onclick="setImageAlign('center')">Center</button>
+<button onclick="setImageAlign('right')">Right</button>
+</div>
+<input type="range" min="20" max="100" onchange="setImageWidth(this.value)">
+
+<h4>Elements</h4>
+<button onclick="addSection()">Add Text Section</button>
+<button onclick="addButton()">Add Button</button>
+<button onclick="addImage()">Add Image</button> <!-- NEW IMAGE BUTTON -->
+<button onclick="addAudio()">Add Audio</button>
+<button onclick="addVideo()">Add Video</button>
+<button onclick="saveProject()">Save</button>
+<button onclick="loadProject()">Load</button>
+</div>
+
+<div id="editor"></div>
+</div>
+
+<!-- DISCLAIMER MODAL -->
+<div id="disclaimerModal">
+<div class="content">
+<h3>Disclaimer</h3>
+<p>This builder is frontend-only, educational, and does not save data on a server. All content is your responsibility.</p>
+<button onclick="acceptDisclaimer()">I Agree</button>
+</div>
+</div>
+
+<script>
+let pages={home:[],about:[],contact:[]};
+let currentPage="home";
+let selected=null;
+
+/* MAIN SITE */
+function showMain(p){
+  home.classList.add("hidden");
+  about.classList.add("hidden");
+  document.getElementById(p).classList.remove("hidden");
+}
+
+/* BUILDER */
+function openBuilder(){ document.getElementById("disclaimerModal").style.display="flex"; }
+function acceptDisclaimer(){
+  document.getElementById("disclaimerModal").style.display="none";
+  document.getElementById("mainSite").classList.add("hidden");
+  document.getElementById("builder").classList.remove("hidden");
+  loadEditor();
+}
+function exitBuilder(){
+  document.getElementById("builder").classList.add("hidden");
+  document.getElementById("mainSite").classList.remove("hidden");
+}
+function switchPage(p){ saveCurrent(); currentPage=p; loadEditor(); }
+
+/* ELEMENTS */
+function addSection(){ pages[currentPage].push(`<h2 class="edit" contenteditable>New Section</h2><p class="edit" contenteditable>Edit text here</p>`); loadEditor(); }
+
+function addButton(){
+  let text = prompt("Button Text:", "Click Me");
+  let action = prompt("Button Action (alert:message OR url:http://example.com)", "alert:Hello!");
+  pages[currentPage].push(`<button class="edit-button" onclick="buttonAction(this,'${action}')">${text}</button>`);
+  loadEditor();
+}
+function buttonAction(btn, action){
+  if(!action) return;
+  if(action.startsWith("alert:")) alert(action.replace("alert:",""));
+  if(action.startsWith("url:")) window.open(action.replace("url:",""),"_blank");
+}
+
+function addImage(){
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = ev => {
+      pages[currentPage].push(`<img class="edit-img" src="${ev.target.result}">`);
+      loadEditor();
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+function addAudio(){
+  const input=document.createElement("input");
+  input.type="file"; input.accept="audio/*";
+  input.onchange=e=>{
+    const file=e.target.files[0];
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      pages[currentPage].push(`<audio class="edit-audio" controls src="${ev.target.result}"></audio>`);
+      loadEditor();
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+function addVideo(){
+  const input=document.createElement("input");
+  input.type="file"; input.accept="video/*";
+  input.onchange=e=>{
+    const file=e.target.files[0];
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      pages[currentPage].push(`<video class="edit-video" controls src="${ev.target.result}" style="max-width:100%;"></video>`);
+      loadEditor();
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+function loadEditor(){
+  editor.innerHTML="";
+  pages[currentPage].forEach((html,i)=>{
+    const div=document.createElement("div");
+    div.className="builder-section";
+    div.innerHTML=html+`<button class="delete" onclick="deleteSection(${i})">X</button>`;
+    enableEditing(div);
+    editor.appendChild(div);
+  });
+}
+function deleteSection(i){ pages[currentPage].splice(i,1); loadEditor(); }
+function saveCurrent(){ pages[currentPage]=[...editor.children].map(s=>s.innerHTML.replace(/<button.*?<\/button>/,"")); }
+
+/* SELECTION */
+function enableEditing(section){
+  section.querySelectorAll(".edit,.edit-img,.edit-audio,.edit-video,.edit-button").forEach(el=>{
+    el.onclick=e=>{
+      if(selected) selected.classList.remove("selected");
+      selected=e.target;
+      selected.classList.add("selected");
+    };
+  });
+  section.querySelectorAll(".edit-img").forEach(img=>{
+    img.onclick=()=>{
+      select(img);
+      const i=document.createElement("input"); i.type="file"; i.accept="image/*";
+      i.onchange=e=>{
+        const file=e.target.files[0];
+        const reader=new FileReader();
+        reader.onload=ev=>{ img.src=ev.target.result; };
+        reader.readAsDataURL(file);
+      };
+      i.click();
+    };
+  });
+}
+function select(el){ if(selected) selected.classList.remove("selected"); selected=el; selected.classList.add("selected"); }
+
+/* STYLING */
+function setTextColor(c){ if(selected && selected.classList.contains("edit")) selected.style.color=c; }
+function setFont(f){ document.documentElement.style.setProperty("--font",f); }
+function setFontSize(s){ if(selected) selected.style.fontSize=s+"px"; }
+function setTextAlign(a){ if(selected) selected.style.textAlign=a; }
+function setImageAlign(a){
+  if(selected && selected.tagName==="IMG"){ selected.style.display="block"; selected.style.margin=a==="center"?"auto":a==="left"?"0 auto 0 0":"0 0 0 auto"; }
+}
+function setImageWidth(w){ if(selected && selected.tagName==="IMG"){ selected.style.width=w+"%"; } }
+
+/* SAVE / LOAD / EXPORT */
+function saveProject(){ saveCurrent(); localStorage.setItem("builderData",JSON.stringify(pages)); alert("Saved"); }
+function loadProject(){ const d=localStorage.getItem("builderData"); if(d){ pages=JSON.parse(d); loadEditor(); } }
+function exportSite(){
+  saveCurrent();
+  let html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+body{font-family:${getComputedStyle(document.documentElement).getPropertyValue("--font")};background:#111;color:#fff;}
+section{padding:60px;} img,audio,video,button{max-width:100%;display:block;margin-top:15px;}
+button{padding:10px 20px;border-radius:6px;background:#00ffcc;color:#000;border:none;cursor:pointer;}
+</style></head><body>`;
+  for(let p in pages){ html+=`<section>${pages[p].join("")}</section>`; }
+  html+=`</body></html>`;
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([html],{type:"text/html"}));
+  a.download="website.html";
+  a.click();
+}
+</script>
+</body>
+</html>

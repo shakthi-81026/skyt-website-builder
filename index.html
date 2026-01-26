@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skyt x code - Full Controls</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+body,html{margin:0;padding:0;font-family:'Orbitron',sans-serif;background:#0b0b0f;color:#fff;}
+.hidden{display:none;}
+button,select,input{cursor:pointer;border:none;border-radius:10px;padding:8px;font-family:'Orbitron',sans-serif;margin:3px;transition:0.2s;}
+button:hover,select:hover,input:hover{opacity:0.9;transform:scale(1.05);}
+h1,h2,h3{margin:5px 0;text-align:center;}
+nav{background:rgba(0,255,255,0.05);backdrop-filter:blur(5px);display:flex;justify-content:center;gap:20px;padding:10px;position:fixed;width:100%;z-index:10;}
+nav button{background:linear-gradient(135deg,#0ff,#0f0,#0ff);color:#000;font-weight:bold;font-size:1em;}
+#home,#about{display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;}
+#editor{display:flex;width:100%;height:100vh;margin-top:50px;}
+.sidebar{width:320px;background:rgba(0,255,255,0.05);backdrop-filter:blur(5px);padding:10px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;}
+.block{background:linear-gradient(135deg,#0ff,#0f0,#0ff);color:#000;padding:8px;text-align:center;cursor:grab;border-radius:8px;font-weight:bold;user-select:none;}
+.sequence{min-height:200px;background:rgba(0,255,255,0.1);border:2px dashed #0ff;border-radius:8px;padding:5px;display:flex;flex-direction:column;gap:5px;overflow-y:auto;}
+.sequence .block-item{background:rgba(0,255,255,0.2);color:#0ff;padding:5px;margin-bottom:3px;border-radius:6px;cursor:grab;display:flex;justify-content:space-between;align-items:center;}
+.sequence .block-item span{flex:1;}
+.stage{flex:1;background:#0b0b30;position:relative;overflow:hidden;border-left:2px solid #0ff;}
+.sprite{position:absolute;cursor:move;display:flex;justify-content:center;align-items:center;user-select:none;border:2px solid #0ff;padding:10px;border-radius:5px;background:#0ff;transition:0.2s;}
+input[type=color]{padding:0;height:35px;}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+    <button id="navHomeBtn">Home</button>
+    <button id="navAboutBtn">About</button>
+</nav>
+
+<!-- Home -->
+<div id="home">
+    <h1>🚀 Skyt x code </h1>
+    <p>skyt x code in the browser. Drag sprites, add blocks, nested loops, sounds, import/export, save/load.</p>
+</div>
+
+<!-- About -->
+<div id="about" class="hidden">
+    <h1>About</h1>
+    <p>This skyt x code supports multiple sprites, motion blocks, nested loops, sounds, project save/load, and futuristic UI.This website is designed and created by shakthi krishna.Inspired by scrath jr</p>
+</div>
+
+<!-- Editor -->
+<div id="editor">
+    <div class="sidebar">
+        <h3>Blocks</h3>
+        <div class="block" data-action="moveRight">➡ Move Right</div>
+        <div class="block" data-action="moveLeft">⬅ Move Left</div>
+        <div class="block" data-action="moveUp">⬆ Move Up</div>
+        <div class="block" data-action="moveDown">⬇ Move Down</div>
+        <div class="block" data-action="repeat">🔁 Repeat</div>
+        <div class="block" data-action="sound1">🔊 Sound 1</div>
+        <div class="block" data-action="sound2">🔊 Sound 2</div>
+
+        <h3>Program</h3>
+        <div class="sequence" id="programSequence"><p style="color:#aaa;font-size:12px;">Drag blocks here</p></div>
+
+        <button id="playBtn">▶ Play</button>
+        <button id="stopBtn">⏹ Stop</button>
+        <button id="addSpriteBtn">➕ Add Sprite</button>
+        <button id="delSpriteBtn">🗑 Delete Sprite</button>
+        <button id="clearStageBtn">🧹 Clear Stage</button>
+
+        <h3>Sprite Appearance</h3>
+        <select id="shapeSelect">
+            <option value="square">Square</option>
+            <option value="circle">Circle</option>
+            <option value="triangle">Triangle</option>
+            <option value="star">Star</option>
+        </select>
+        <input type="color" id="spriteColor" value="#0ff">
+
+        <h3>Sprite Import/Export</h3>
+        <button id="exportSpriteBtn">📤 Export Sprite</button>
+        <input type="file" id="importSpriteInput">
+        <button id="importSpriteBtn">📥 Import Sprite</button>
+
+        <h3>Project Save/Load</h3>
+        <button id="saveProjectBtn">💾 Save Project</button>
+        <button id="loadProjectBtn">📂 Load Project</button>
+
+        <h3>Background</h3>
+        <select id="bgSelect">
+            <option value="#0b0b30">Dark Blue</option>
+            <option value="#302b0b">Brown</option>
+        </select>
+    </div>
+    <div class="stage" id="stage"></div>
+</div>
+
+<script>
+// --- Navigation ---
+const home=document.getElementById('home');
+const about=document.getElementById('about');
+const editor=document.getElementById('editor');
+document.getElementById('navHomeBtn').onclick=()=>{home.classList.remove('hidden'); about.classList.add('hidden');}
+document.getElementById('navAboutBtn').onclick=()=>{about.classList.remove('hidden'); home.classList.add('hidden');}
+
+// --- Globals ---
+const stage=document.getElementById('stage');
+const programSequence=document.getElementById('programSequence');
+let sprites=[],activeSprite=null,stopFlag=false;
+const blocks=document.querySelectorAll('.block');
+
+// --- Helpers ---
+function selectSprite(sprite){
+    activeSprite=sprite;
+    sprites.forEach(s=>s.style.outline='');
+    sprite.style.outline='2px solid #0f0';
+    renderProgram();
+    // Update UI
+    document.getElementById('shapeSelect').value=sprite.dataset.shape||'square';
+    document.getElementById('spriteColor').value=sprite.style.backgroundColor || '#0ff';
+}
+
+function renderProgram(){
+    if(!activeSprite){programSequence.innerHTML='<p style="color:#aaa;font-size:12px;">Drag blocks here</p>'; return;}
+    programSequence.innerHTML='';
+    activeSprite.program.forEach((b,i)=>{
+        const div=document.createElement('div');
+        div.className='block-item';
+        const span=document.createElement('span');
+        if(typeof b==='object' && b.type==='repeat'){
+            span.textContent='🔁 Repeat '+b.count+'x';
+            const inner=document.createElement('div'); inner.style.marginLeft='10px';
+            b.children.forEach(c=>{
+                const childDiv=document.createElement('div'); childDiv.className='block-item'; childDiv.textContent=c; inner.appendChild(childDiv);
+            })
+            div.appendChild(span);
+            div.appendChild(inner);
+        }else{
+            span.textContent=b;
+            div.appendChild(span);
+        }
+        // Delete on click
+        const del=document.createElement('button'); del.textContent='❌'; del.style.background='transparent'; del.onclick=(e)=>{e.stopPropagation(); activeSprite.program.splice(i,1); renderProgram();}
+        div.appendChild(del);
+        programSequence.appendChild(div);
+    });
+}
+
+// --- Blocks ---
+blocks.forEach(b=>b.onclick=()=>{
+    if(!activeSprite) return alert('Select a sprite!');
+    const action=b.dataset.action;
+    if(action==='repeat'){
+        activeSprite.program.push({type:'repeat',count:2,children:[]});
+    }else{
+        const last=activeSprite.program[activeSprite.program.length-1];
+        if(last && last.type==='repeat') last.children.push(action);
+        else activeSprite.program.push(action);
+    }
+    renderProgram();
+});
+
+// --- Sprites ---
+function createSprite(shape='square',color='#0ff',left=50,top=50){
+    const s=document.createElement('div'); s.className='sprite'; s.style.top=top+'px'; s.style.left=left+'px'; s.program=[];
+    s.dataset.shape=shape; s.style.backgroundColor=color;
+    stage.appendChild(s); sprites.push(s); selectSprite(s);
+
+    // Drag
+    let offsetX,offsetY,isDragging=false;
+    s.onmousedown=(e)=>{isDragging=true;offsetX=e.offsetX; offsetY=e.offsetY; selectSprite(s);}
+    document.onmousemove=(e)=>{if(isDragging){s.style.left=(e.clientX-offsetX)+'px'; s.style.top=(e.clientY-offsetY)+'px';}}
+    document.onmouseup=()=>{isDragging=false;}
+}
+document.getElementById('addSpriteBtn').onclick=()=>{createSprite(document.getElementById('shapeSelect').value,document.getElementById('spriteColor').value);}
+document.getElementById('delSpriteBtn').onclick=()=>{if(!activeSprite)return; stage.removeChild(activeSprite); sprites=sprites.filter(s=>s!==activeSprite); activeSprite=null; renderProgram();}
+document.getElementById('clearStageBtn').onclick=()=>{sprites.forEach(s=>stage.removeChild(s)); sprites=[]; activeSprite=null; renderProgram();}
+
+// --- Sprite Appearance ---
+document.getElementById('shapeSelect').onchange=e=>{if(activeSprite) activeSprite.dataset.shape=e.target.value;}
+document.getElementById('spriteColor').onchange=e=>{if(activeSprite) activeSprite.style.backgroundColor=e.target.value;}
+
+// --- Play / Stop ---
+async function runProgramBlock(sprite,block){
+    if(stopFlag) return;
+    let left=parseInt(sprite.style.left)||0;
+    let top=parseInt(sprite.style.top)||0;
+    if(typeof block==='object' && block.type==='repeat'){
+        for(let i=0;i<block.count;i++){
+            for(const c of block.children) await runProgramBlock(sprite,c);
+        }
+    }else{
+        if(block==='moveRight') left+=50;
+        if(block==='moveLeft') left-=50;
+        if(block==='moveUp') top-=50;
+        if(block==='moveDown') top+=50;
+        if(block==='sound1') new Audio('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg').play();
+        if(block==='sound2') new Audio('https://actions.google.com/sounds/v1/cartoon/boing.ogg').play();
+        sprite.style.left=left+'px'; sprite.style.top=top+'px';
+        await new Promise(r=>setTimeout(r,200));
+    }
+}
+async function runProgram(){stopFlag=false;if(!activeSprite)return; for(const b of activeSprite.program){await runProgramBlock(activeSprite,b);}}
+document.getElementById('playBtn').onclick=runProgram;
+document.getElementById('stopBtn').onclick=()=>{stopFlag=true;}
+
+// --- Background ---
+document.getElementById('bgSelect').onchange=e=>{stage.style.backgroundColor=e.target.value;}
+
+// --- Sprite Import/Export ---
+document.getElementById('exportSpriteBtn').onclick=()=>{
+    if(!activeSprite)return alert('Select a sprite!');
+    const data=JSON.stringify({shape:activeSprite.dataset.shape,program:activeSprite.program,style:{left:activeSprite.style.left,top:activeSprite.style.top},color:activeSprite.style.backgroundColor});
+    const blob=new Blob([data],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='sprite.json'; a.click();
+}
+document.getElementById('importSpriteBtn').onclick=()=>{
+    const file=document.getElementById('importSpriteInput').files[0];
+    if(!file)return alert('Select a file');
+    const reader=new FileReader();
+    reader.onload=e=>{
+        const obj=JSON.parse(e.target.result);
+        createSprite(obj.shape,obj.color,parseInt(obj.style.left),parseInt(obj.style.top));
+        sprites[sprites.length-1].program=obj.program;
+    }
+    reader.readAsText(file)
+}
+
+// --- Project Save/Load ---
+document.getElementById('saveProjectBtn').onclick=()=>{
+    const project={bg:stage.style.backgroundColor,sprites:sprites.map(s=>({shape:s.dataset.shape,program:s.program,style:{left:s.style.left,top:s.style.top},color:s.style.backgroundColor}))};
+    localStorage.setItem('scratchProject',JSON.stringify(project));
+    alert('Project saved!');
+}
+document.getElementById('loadProjectBtn').onclick=()=>{
+    const project=JSON.parse(localStorage.getItem('scratchProject'));
+    if(!project)return alert('No project saved');
+    stage.innerHTML=''; sprites=[];
+    stage.style.backgroundColor=project.bg;
+    project.sprites.forEach(obj=>{createSprite(obj.shape,obj.color,parseInt(obj.style.left),parseInt(obj.style.top)); sprites[sprites.length-1].program=obj.program;})
+}
+
+// --- Init ---
+createSprite();
+stage.style.backgroundColor='#0b0b30';
+</script>
+</body>
+</html>

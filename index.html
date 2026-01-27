@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Skyt Futuristic Builder v5</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --primary:#00ffcc;
+  --accent:#ff00ff;
+  --bg:#111;
+  --font:'Poppins', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:var(--font);}
+body{
+  background: var(--bg);
+  color:#fff;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:'';
+  position: fixed;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(0,255,204,0.1) 10%, transparent 70%), radial-gradient(circle, rgba(255,0,255,0.1) 10%, transparent 70%);
+  animation: floatBG 40s linear infinite;
+  z-index:-1;
+  top:-50%; left:-50%;
+}
+@keyframes floatBG{
+  0% {transform: translate(0,0);}
+  50% {transform: translate(50px,50px);}
+  100% {transform: translate(0,0);}
+}
+
+.hidden{display:none;}
+header{
+  background:linear-gradient(90deg,#000,#111);
+  padding:20px 50px;
+  display:flex;justify-content:space-between;align-items:center;
+  box-shadow:0 0 30px #00ffcc33;
+}
+header h2{
+  color:var(--primary);
+  text-shadow: 0 0 10px #00ffcc,0 0 20px #ff00ff;
+}
+nav a, nav button{
+  margin-left:20px;background:none;border:none;font-size:16px;color:#fff;cursor:pointer;transition:0.3s;
+}
+nav a:hover, nav button:hover{color:var(--primary);}
+nav button{color:var(--accent);}
+
+/* Sections */
+section{
+  padding:80px 10%;
+  transition:all 0.5s;
+}
+.hero{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:50px;
+  align-items:center;
+}
+.hero h2{
+  font-size:48px;
+  color:var(--primary);
+  text-shadow: 0 0 10px #00ffcc,0 0 20px #ff00ff;
+}
+.hero p{font-size:18px;color:#aaa;}
+.hero img{
+  width:100%;
+  border-radius:20px;
+  box-shadow:0 0 30px #00ffcc33;
+}
+
+/* Glassmorphism Builder Sections */
+.builder-section{
+  border:2px solid rgba(0,255,204,0.5);
+  backdrop-filter: blur(10px);
+  background: rgba(30,30,30,0.6);
+  padding:25px;
+  margin-bottom:30px;
+  border-radius:12px;
+  position:relative;
+  cursor:move;
+  box-shadow: 0 0 20px rgba(0,255,204,0.3),0 0 40px rgba(255,0,255,0.2);
+  transition: all 0.3s ease;
+}
+.builder-section:hover{
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 0 30px rgba(0,255,204,0.6),0 0 60px rgba(255,0,255,0.5);
+}
+.builder-section .delete{
+  position:absolute;top:10px;right:10px;background:#ff4d4d;color:#fff;border:none;padding:5px 10px;cursor:pointer;border-radius:6px;
+}
+.edit{cursor:text;}
+.selected{outline:3px solid var(--primary);}
+.edit-img,.edit-video,.edit-audio,.edit-button{max-width:100%;margin-top:15px;cursor:pointer;display:block;transition:0.3s;}
+.edit-button, #exportButton{
+  background: linear-gradient(45deg,#00ffcc,#ff00ff);
+  color: #000;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-weight: bold;
+  box-shadow: 0 0 10px #00ffcc,0 0 20px #ff00ff;
+  transition: all 0.3s ease;
+}
+.edit-button:hover, #exportButton:hover{
+  transform: scale(1.1);
+  box-shadow:0 0 20px #00ffcc,0 0 40px #ff00ff;
+}
+.align-box{display:flex;gap:5px;margin-top:8px;}
+.align-box button{flex:1;}
+footer{text-align:center;padding:20px;font-size:12px;color:#888;text-shadow:0 0 5px #00ffcc;}
+
+#builderHeader{
+  background:#000;color:var(--primary);
+  padding:15px 40px;
+  display:flex;justify-content:space-between;align-items:center;
+  box-shadow:0 0 20px #00ffcc33;
+}
+#sidebar{
+  position:fixed;left:0;top:60px;width:320px;height:100%;
+  background:#111;padding:20px;box-shadow:5px 0 30px #00ffcc33;
+  overflow:auto;color:#fff;
+}
+#sidebar h4{margin-top:20px;color:var(--primary);}
+#sidebar button,#sidebar input,#sidebar select,#sidebar textarea{width:100%;margin-top:8px;padding:10px;border-radius:8px;border:none;background:#222;color:#fff;cursor:pointer;transition:0.3s;font-weight:bold;}
+#sidebar button:hover,#sidebar select:hover,#sidebar input:hover,#sidebar textarea:hover{background:var(--primary);color:#000;}
+#editor{margin-left:340px;padding:40px;}
+@media(max-width:900px){#sidebar{position:relative;width:100%;} #editor{margin-left:0;} .hero{grid-template-columns:1fr;}}
+
+</style>
+</head>
+<body>
+
+<div id="mainSite">
+<header>
+<h2>Skyt Futuristic Builder</h2>
+<nav>
+<a onclick="showMain('home')">Home</a>
+<a onclick="showMain('about')">About</a>
+<button onclick="openBuilder()">Website Builder</button>
+</nav>
+</header>
+
+<section id="home">
+<div class="hero">
+<div>
+<h2>Futuristic Websites</h2>
+<p>Create interactive pages easily with neon effects and futuristic layouts.</p>
+</div>
+<img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f">
+</div>
+</section>
+
+<section id="about" class="hidden">
+<div class="builder-section">
+<h2>About Us</h2>
+<p>Create interactive pages easily with neon effects and futuristic layouts.This website is created by shakthi krishna</p>
+</div>
+</section>
+
+<footer>
+© 2026 Skyt Builder ⚡ <span style="font-size:10px;color:#888">Educational purposes only.</span>
+</footer>
+</div>
+
+<!-- BUILDER -->
+<div id="builder" class="hidden">
+<div id="builderHeader">
+<h3>Website Builder</h3>
+<button onclick="exitBuilder()">Exit</button>
+</div>
+
+<div id="sidebar">
+<button id="exportButton" onclick="exportSite()">EXPORT</button>
+<select onchange="switchPage(this.value)">
+<option value="home">Home Page</option>
+<option value="about">About Page</option>
+<option value="contact">Contact Page</option>
+</select>
+
+<h4>Text</h4>
+<input type="color" onchange="setTextColor(this.value)">
+<select onchange="setFont(this.value)">
+<option>Poppins</option>
+<option>Arial</option>
+<option>Georgia</option>
+<option>Roboto</option>
+<option>Courier New</option>
+</select>
+<input type="number" placeholder="Font size (px)" onchange="setFontSize(this.value)">
+<div class="align-box">
+<button onclick="setTextAlign('left')">Left</button>
+<button onclick="setTextAlign('center')">Center</button>
+<button onclick="setTextAlign('right')">Right</button>
+</div>
+
+<h4>Media</h4>
+<div class="align-box">
+<button onclick="setMediaAlign('left')">Left</button>
+<button onclick="setMediaAlign('center')">Center</button>
+<button onclick="setMediaAlign('right')">Right</button>
+</div>
+<input type="range" min="20" max="100" onchange="setMediaWidth(this.value)">
+
+<h4>Elements</h4>
+<button onclick="addSection()">Add Text Section</button>
+<button onclick="addButton()">Add Button</button>
+<button onclick="addImage()">Add Image</button>
+<button onclick="addAudio()">Add Audio</button>
+<button onclick="addVideo()">Add Video</button>
+
+<h4>Templates</h4>
+<select id="templateSelect" onchange="insertTemplate(this.value)">
+<option value="">Select Template</option>
+<option value="hero">Hero Section</option>
+<option value="features">Feature Cards</option>
+<option value="cta">Call-to-Action</option>
+<option value="media">Media Section</option>
+<option value="footer">Footer</option>
+</select>
+
+<h4>Advanced</h4>
+<button onclick="undo()">Undo</button>
+<button onclick="redo()">Redo</button>
+<textarea placeholder="Custom CSS for selected element" oninput="setCustomCSS(this.value)"></textarea>
+<button onclick="previewSite()">Preview Mode</button>
+
+<h4>Section Background</h4>
+<input type="color" onchange="setSectionBG(this.value)">
+<input type="file" accept="image/*" onchange="setSectionBGImage(this)">
+</div>
+
+<div id="editor"></div>
+</div>
+
+<div id="disclaimerModal">
+<div class="content">
+<h3>Disclaimer</h3>
+<p>This builder is frontend-only, educational, and does not save data on a server. All content is your responsibility.</p>
+<button onclick="acceptDisclaimer()">I Agree</button>
+</div>
+</div>
+
+<script>
+let pages={home:[],about:[],contact:[]};
+let currentPage="home";
+let selected=null;
+let undoStack=[];
+let redoStack=[];
+
+/* MAIN SITE */
+function showMain(p){
+  home.classList.add("hidden");
+  about.classList.add("hidden");
+  document.getElementById(p).classList.remove("hidden");
+}
+
+/* BUILDER */
+function openBuilder(){ document.getElementById("disclaimerModal").style.display="flex"; }
+function acceptDisclaimer(){
+  document.getElementById("disclaimerModal").style.display="none";
+  document.getElementById("mainSite").classList.add("hidden");
+  document.getElementById("builder").classList.remove("hidden");
+  loadEditor();
+}
+function exitBuilder(){
+  document.getElementById("builder").classList.add("hidden");
+  document.getElementById("mainSite").classList.remove("hidden");
+}
+function switchPage(p){ saveCurrent(); currentPage=p; loadEditor(); }
+
+/* ELEMENTS */
+function addSection(){ pages[currentPage].push(`<h2 class="edit" contenteditable>New Section</h2><p class="edit" contenteditable>Edit text here</p>`); saveUndo(); loadEditor(); }
+function addButton(){
+  let text = prompt("Button Text:", "Click Me");
+  let action = prompt("Button Action (alert:message OR url:http://example.com)","alert:Hello!");
+  pages[currentPage].push(`<button class="edit-button" onclick="buttonAction(this,'${action}')">${text}</button>`);
+  saveUndo(); loadEditor();
+}
+function buttonAction(btn, action){
+  if(!action) return;
+  if(action.startsWith("alert:")) alert(action.replace("alert:",""));
+  if(action.startsWith("url:")) window.open(action.replace("url:",""),"_blank");
+}
+function addImage(){ const input=document.createElement("input"); input.type="file"; input.accept="image/*"; input.onchange=e=>{ const file=e.target.files[0]; const reader=new FileReader(); reader.onload=ev=>{ pages[currentPage].push(`<img class="edit-img" src="${ev.target.result}">`); saveUndo(); loadEditor(); }; reader.readAsDataURL(file); }; input.click(); }
+function addAudio(){ const input=document.createElement("input"); input.type="file"; input.accept="audio/*"; input.onchange=e=>{ const file=e.target.files[0]; const reader=new FileReader(); reader.onload=ev=>{ pages[currentPage].push(`<audio class="edit-audio" controls src="${ev.target.result}"></audio>`); saveUndo(); loadEditor(); }; reader.readAsDataURL(file); }; input.click(); }
+function addVideo(){ const input=document.createElement("input"); input.type="file"; input.accept="video/*"; input.onchange=e=>{ const file=e.target.files[0]; const reader=new FileReader(); reader.onload=ev=>{ pages[currentPage].push(`<video class="edit-video" controls src="${ev.target.result}" style="max-width:100%;"></video>`); saveUndo(); loadEditor(); }; reader.readAsDataURL(file); }; input.click(); }
+
+/* TEMPLATES */
+function insertTemplate(name){
+  if(!name) return;
+  let html="";
+  if(name==="hero") html=`<h2 class="edit" contenteditable>Hero Heading</h2><p class="edit" contenteditable>Hero subtitle text here.</p><img class="edit-img" src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f">`;
+  if(name==="features") html=`<div style="display:flex;gap:20px;"><div style="flex:1;background:rgba(30,30,30,0.6);padding:15px;border-radius:10px;text-align:center;backdrop-filter:blur(10px);">⚡<h3 class="edit" contenteditable>Feature 1</h3><p class="edit" contenteditable>Description</p></div><div style="flex:1;background:rgba(30,30,30,0.6);padding:15px;border-radius:10px;text-align:center;backdrop-filter:blur(10px);">✨<h3 class="edit" contenteditable>Feature 2</h3><p class="edit" contenteditable>Description</p></div><div style="flex:1;background:rgba(30,30,30,0.6);padding:15px;border-radius:10px;text-align:center;backdrop-filter:blur(10px);">🚀<h3 class="edit" contenteditable>Feature 3</h3><p class="edit" contenteditable>Description</p></div></div>`;
+  if(name==="cta") html=`<h2 class="edit" contenteditable>Call to Action</h2><button class="edit-button" onclick="alert('Clicked!')">Click Me</button>`;
+  if(name==="media") html=`<img class="edit-img" src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f"><video class="edit-video" controls src="" style="max-width:100%;"></video>`;
+  if(name==="footer") html=`<footer>© 2026 Skyt Builder ⚡ All rights reserved. <br>🌐 <span style="font-size:10px;color:#888">Educational purposes only.</span></footer>`;
+  pages[currentPage].push(html);
+  saveUndo(); loadEditor();
+  document.getElementById("templateSelect").value="";
+}
+
+/* EDITOR */
+function loadEditor(){
+  editor.innerHTML="";
+  pages[currentPage].forEach((html,i)=>{
+    const div=document.createElement("div");
+    div.className="builder-section";
+    div.innerHTML=html+`<button class="delete" onclick="deleteSection(${i})">X</button>`;
+    enableEditing(div);
+    editor.appendChild(div);
+  });
+}
+
+/* DELETE */
+function deleteSection(i){ pages[currentPage].splice(i,1); saveUndo(); loadEditor(); }
+function saveCurrent(){ pages[currentPage]=[...editor.children].map(s=>s.innerHTML.replace(/<button.*?<\/button>/,"")); }
+
+/* SELECTION & STYLING */
+function enableEditing(section){
+  section.querySelectorAll(".edit,.edit-img,.edit-audio,.edit-video,.edit-button").forEach(el=>{
+    el.onclick=e=>{
+      if(selected) selected.classList.remove("selected");
+      selected=e.target;
+      selected.classList.add("selected");
+    };
+  });
+}
+function setTextColor(c){ if(selected && selected.classList.contains("edit")) selected.style.color=c; saveUndo(); }
+function setFont(f){ document.documentElement.style.setProperty("--font",f); }
+function setFontSize(s){ if(selected) selected.style.fontSize=s+"px"; saveUndo(); }
+function setTextAlign(a){ if(selected) selected.style.textAlign=a; saveUndo(); }
+function setMediaAlign(a){ if(selected && ['IMG','VIDEO','AUDIO'].includes(selected.tagName)){ selected.style.display="block"; selected.style.margin=a==="center"?"auto":a==="left"?"0 auto 0 0":"0 0 0 auto"; saveUndo(); } }
+function setMediaWidth(w){ if(selected && ['IMG','VIDEO','AUDIO'].includes(selected.tagName)){ selected.style.width=w+"%"; saveUndo(); } }
+function setCustomCSS(css){ if(selected) selected.style.cssText+=css; saveUndo(); }
+function setSectionBG(color){ if(selected && selected.classList.contains('builder-section')) selected.style.background=color; saveUndo(); }
+function setSectionBGImage(input){ if(selected && selected.classList.contains('builder-section')){ const file=input.files[0]; const reader=new FileReader(); reader.onload=ev=>{ selected.style.backgroundImage=`url(${ev.target.result})`; selected.style.backgroundSize='cover'; selected.style.backgroundPosition='center'; saveUndo(); }; reader.readAsDataURL(file); } }
+
+/* SAVE / LOAD / EXPORT */
+function saveProject(){ saveCurrent(); localStorage.setItem("builderData",JSON.stringify(pages)); alert("Saved"); }
+function loadProject(){ const d=localStorage.getItem("builderData"); if(d){ pages=JSON.parse(d); loadEditor(); } }
+function exportSite(){ saveCurrent(); let html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:${getComputedStyle(document.documentElement).getPropertyValue("--font")};background:#111;color:#fff;}section{padding:60px;}img,audio,video,button{max-width:100%;display:block;margin-top:15px;}button{padding:10px 20px;border-radius:6px;background:#00ffcc;color:#000;border:none;cursor:pointer;}</style></head><body>`; for(let p in pages){ html+=`<section>${pages[p].join("")}</section>`; } html+="</body></html>"; const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([html],{type:"text/html"})); a.download="website.html"; a.click(); }
+
+/* UNDO / REDO */
+function saveUndo(){ undoStack.push(JSON.stringify(pages)); if(undoStack.length>50) undoStack.shift(); redoStack=[]; }
+function undo(){ if(undoStack.length>0){ redoStack.push(JSON.stringify(pages)); pages=JSON.parse(undoStack.pop()); loadEditor(); } }
+function redo(){ if(redoStack.length>0){ undoStack.push(JSON.stringify(pages)); pages=JSON.parse(redoStack.pop()); loadEditor(); } }
+
+/* PREVIEW */
+function previewSite(){
+  saveCurrent();
+  const previewWindow = window.open("","_blank");
+  let html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Preview</title><style>body{font-family:${getComputedStyle(document.documentElement).getPropertyValue("--font")};background:#111;color:#fff;}section{padding:60px;}img,audio,video,button{max-width:100%;display:block;margin-top:15px;}button{padding:10px 20px;border-radius:6px;background:#00ffcc;color:#000;border:none;cursor:pointer;}</style></head><body>`;
+  for(let p in pages){ html+=`<section>${pages[p].join("")}</section>`; }
+  html+="</body></html>";
+  previewWindow.document.write(html); previewWindow.document.close();
+}
+
+/* DISCLAIMER */
+function acceptDisclaimer(){ document.getElementById("disclaimerModal").style.display="none"; document.getElementById("mainSite").classList.add("hidden"); document.getElementById("builder").classList.remove("hidden"); loadEditor(); }
+</script>
+</body>
+</html>

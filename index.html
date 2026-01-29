@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Skyt Builder - Shakthi Krishna</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{--primary:#00ffcc;--accent:#ff00ff;--success:#00ff88;--danger:#ff4444;--bg:#111;--font:'Poppins',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:var(--font);}
+body{background:linear-gradient(135deg,var(--bg),#1a1a1a);color:#fff;overflow-x:hidden;}
+.hidden{display:none;}
+header{background:linear-gradient(90deg,#000,#111);padding:20px 50px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 0 30px var(--primary)33;}
+header h2{color:var(--primary);text-shadow:0 0 10px var(--primary);}
+nav a,nav button{margin-left:20px;background:none;border:none;color:#fff;font-size:16px;cursor:pointer;transition:0.3s;}
+nav a:hover,nav button:hover{color:var(--primary);}
+nav button{color:var(--accent);}
+section{padding:60px 10%;}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center;}
+.hero h2{font-size:44px;color:var(--primary);}
+.hero p{font-size:18px;color:#aaa;}
+.hero img{width:100%;border-radius:20px;box-shadow:0 0 30px var(--primary)33;}
+.box{background:#222;padding:30px;border-radius:20px;box-shadow:0 0 20px var(--accent)33;}
+.badge{background:var(--success);color:#000;padding:8px 16px;border-radius:25px;font-size:13px;font-weight:bold;display:inline-block;}
+.template-card{cursor:pointer;padding:25px;border-radius:15px;transition:0.3s;text-align:center;}
+.template-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px var(--primary)44;}
+footer{text-align:center;padding:30px;color:#888;border-top:1px solid #333;}
+#builderHeader{background:linear-gradient(90deg,#000,#111);color:var(--primary);padding:15px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 0 25px var(--primary)33;}
+#sidebar{position:fixed;left:0;top:75px;width:300px;height:calc(100vh - 75px);background:#111;padding:20px;overflow:auto;box-shadow:5px 0 25px var(--primary)33;}
+#sidebar h4{margin:20px 0 10px;color:var(--primary);border-bottom:1px solid #444;padding-bottom:8px;}
+#sidebar button{width:100%;margin:6px 0;padding:12px;border-radius:8px;border:none;background:#222;color:#fff;cursor:pointer;font-size:14px;transition:0.3s;}
+#sidebar button:hover{background:var(--primary);color:#000;}
+#exportButton{background:linear-gradient(45deg,var(--primary),var(--accent));color:#000;font-weight:700;padding:16px;border-radius:12px;margin:20px 0;font-size:16px;text-transform:uppercase;}
+#statusBar{position:fixed;bottom:0;left:300px;right:0;background:#222;padding:10px;color:var(--success);font-size:13px;display:flex;justify-content:space-between;}
+#editor{margin-left:320px;padding:80px 20px 100px;}
+.builder-section{border:2px dashed #555;padding:25px;margin:25px 0;background:#1a1a1a;border-radius:12px;position:relative;}
+.builder-section:hover{border-color:var(--primary);}
+.builder-section .delete{position:absolute;top:10px;right:10px;background:var(--danger);color:#fff;border:none;padding:8px;border-radius:50%;cursor:pointer;}
+.selected{outline:3px solid var(--primary);box-shadow:0 0 20px var(--primary);}
+.edit{cursor:text;}
+.tab-buttons{display:flex;gap:5px;margin:20px 0;}
+.tab-buttons button{padding:10px 20px;border-radius:8px 8px 0 0;background:#222;border:1px solid #444;cursor:pointer;}
+.tab-buttons button.active{background:var(--primary);color:#000;}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+#previewFrame{width:100%;height:500px;border:2px solid var(--primary);border-radius:10px;background:#000;margin:20px 0;}
+#disclaimer{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);display:none;justify-content:center;align-items:center;z-index:10000;}
+#disclaimer.active{display:flex;}
+#disclaimerContent{background:#111;padding:40px;border-radius:20px;max-width:500px;text-align:center;box-shadow:0 0 40px var(--primary);}
+.warning{background:#ff444422;padding:15px;border-radius:10px;border-left:4px solid var(--danger);margin:20px 0;}
+@media(max-width:1100px){#sidebar{position:relative;width:100%;}#editor{margin-left:0;padding:60px 15px;}#statusBar{left:0;}}
+</style>
+</head>
+<body>
+
+<div id="mainSite">
+<header>
+<h2>🚀 Skyt Builder <span style="color:var(--accent);">by Shakthi Krishna</span></h2>
+<nav>
+<a onclick="showMain('home')">🏠 Home</a>
+<a onclick="showMain('features')">✨ Features</a>
+<a onclick="showMain('templates')">📋 Templates</a>
+<button onclick="openBuilder()">🎨 START BUILDING</button>
+</nav>
+</header>
+
+<section id="home">
+<div class="hero">
+<div>
+<h2>Skyt Builder Pro</h2>
+<p class="badge">Created by Shakthi Krishna</p>
+<p>Educational drag & drop website builder - 100% free & offline</p>
+</div>
+<img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80">
+</div>
+</section>
+
+<section id="features" class="hidden">
+<div class="box">
+<h2>✨ Features</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-top:20px;">
+<div class="box" style="padding:25px;text-align:center;"><h3>📱 Unlimited Blocks</h3><p>Add as many as needed</p></div>
+<div class="box" style="padding:25px;text-align:center;"><h3>↶ Undo System</h3><p>Full history backup</p></div>
+<div class="box" style="padding:25px;text-align:center;"><h3>👁️ Live Preview</h3><p>Real-time testing</p></div>
+<div class="box" style="padding:25px;text-align:center;"><h3>🔒 Offline Only</h3><p>Files stay secure locally</p></div>
+</div>
+</div>
+</section>
+
+<section id="templates" class="hidden">
+<div class="box">
+<h2>📋 Quick Templates</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:20px;">
+<div class="box template-card" onclick="loadTemplate('portfolio')"><h3>💼 Portfolio</h3><p>Freelancer sites</p></div>
+<div class="box template-card" onclick="loadTemplate('business')"><h3>🏢 Business</h3><p>Company sites</p></div>
+<div class="box template-card" onclick="loadTemplate('landing')"><h3>🎯 Landing</h3><p>Sales pages</p></div>
+</div>
+</div>
+</section>
+
+<footer>© 2026 Skyt Builder - Created by <strong>Shakthi Krishna</strong> | Educational Purpose Only</footer>
+</div>
+
+<div id="builder" class="hidden">
+<div id="builderHeader">
+<h3>🎨 Skyt Builder <span style="color:var(--accent);">by Shakthi Krishna</span></h3>
+<div>
+<button id="previewBtn" onclick="togglePreview()">👁️ Preview</button>
+<button onclick="undo()">↶ Undo</button>
+<button onclick="redo()">↷ Redo</button>
+<button onclick="exitBuilder()">❌ Exit</button>
+</div>
+</div>
+
+<div id="sidebar">
+<button id="exportButton" onclick="exportSite()">🚀 EXPORT WEBSITE</button>
+
+<select id="pageSelect" onchange="switchPage(this.value)">
+<option value="home">🏠 Home</option>
+<option value="about">📄 About</option>
+<option value="contact">✉️ Contact</option>
+</select>
+
+<div class="tab-buttons">
+<button class="tab active" onclick="showTab('elements')">📦 Elements</button>
+<button class="tab" onclick="showTab('style')">🎨 Style</button>
+</div>
+
+<!-- ✅ LINK BUTTON IS HERE - CLEARLY VISIBLE! -->
+<div id="elementsTab" class="tab-content active">
+<h4>➕ Add Blocks</h4>
+<button onclick="addText()">📝 Text Block</button>
+<button onclick="addHeading()">📜 Heading</button>
+<button onclick="addImage()">🖼️ Image</button>
+<button onclick="addLinkButton()" style="background:linear-gradient(45deg,#00ff88,#00cc66);color:#000;font-weight:bold;">🔗 LINK BUTTON</button>
+<button onclick="addButton()">🔘 Action Button</button>
+</div>
+
+<div id="styleTab" class="tab-content">
+<h4>✏️ Edit Selected</h4>
+<input type="color" id="colorPicker" value="#00ffcc" onchange="setColor(this.value)">
+<input type="range" id="sizePicker" min="12" max="48" value="18" onchange="setSize(this.value)">
+<div style="display:flex;gap:5px;margin:10px 0;">
+<button onclick="setAlign('left')">⬅️ Left</button>
+<button onclick="setAlign('center')">↔️ Center</button>
+<button onclick="setAlign('right')">➡️ Right</button>
+</div>
+</div>
+
+<div style="margin-top:25px;padding-top:20px;border-top:1px solid #444;font-size:12px;color:#888;">
+✅ Created by Shakthi Krishna • 🔒 Educational Use Only
+</div>
+</div>
+
+<div id="editor"></div>
+<iframe id="previewFrame" class="hidden"></iframe>
+<div id="statusBar">
+<span id="status">✅ Ready! Click 🔗 LINK BUTTON to test</span>
+<span id="history">History: 0/20</span>
+</div>
+</div>
+
+<!-- DISCLAIMER -->
+<div id="disclaimer">
+<div id="disclaimerContent">
+<h3>🚀 Skyt Builder</h3>
+<p><strong>Created by: Shakthi Krishna</strong></p>
+
+<div class="warning">
+<strong>⚠️ DISCLAIMER</strong><br>
+<strong>NOT OUR RESPONSIBILITY - EDUCATIONAL PURPOSE ONLY</strong><br>
+For learning only. No security guarantee.
+</div>
+
+<button onclick="startBuilder()">✅ START BUILDING</button>
+</div>
+</div>
+
+<script>
+let pages={home:[],about:[],contact:[]},currentPage='home',selected=null,history=[],historyIndex=-1;
+
+function showMain(id){
+  document.querySelectorAll('#mainSite section').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function openBuilder(){document.getElementById('disclaimer').classList.add('active');}
+
+function startBuilder(){
+  document.getElementById('disclaimer').classList.remove('active');
+  document.getElementById('mainSite').classList.add('hidden');
+  document.getElementById('builder').classList.remove('hidden');
+  loadEditor();
+  saveHistory();
+  document.getElementById('status').textContent='✅ Ready! Try 🔗 LINK BUTTON';
+}
+
+function exitBuilder(){
+  document.getElementById('builder').classList.add('hidden');
+  document.getElementById('mainSite').classList.remove('hidden');
+}
+
+function saveHistory(){
+  saveCurrent();
+  if(historyIndex<history.length-1)history=history.slice(0,historyIndex+1);
+  history.push(JSON.parse(JSON.stringify(pages)));
+  historyIndex++;
+  if(history.length>20){history.shift();historyIndex--;}
+  document.getElementById('history').textContent='History: '+historyIndex+'\/20';
+}
+
+function saveCurrent(){
+  pages[currentPage]=Array.from(document.querySelectorAll('.builder-section')).map(s=>s.innerHTML.replace(/<button class="delete".*?<\/button>/i,''));
+}
+
+function undo(){if(historyIndex>0){historyIndex--;pages=JSON.parse(JSON.stringify(history[historyIndex]));loadEditor();document.getElementById('status').textContent='↶ Undo done';}}
+function redo(){if(historyIndex<history.length-1){historyIndex++;pages=JSON.parse(JSON.stringify(history[historyIndex]));loadEditor();document.getElementById('status').textContent='↷ Redo done';}}
+
+function switchPage(p){
+  saveCurrent();
+  currentPage=p;
+  document.getElementById('pageSelect').value=p;
+  loadEditor();
+}
+
+function showTab(t){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById(t+'Tab').classList.add('active');
+}
+
+// ✅ LINK BUTTON FUNCTION - 100% WORKING
+function addLinkButton(){
+  const url = prompt('🔗 Enter website URL:\n(ex: https://google.com)', 'https://google.com') || 'https://google.com';
+  const text = prompt('📝 Button text:', 'Visit Website') || 'Visit Website';
+  
+  pages[currentPage].push(`
+    <div style="text-align:center;margin:30px 0;">
+      <a href="${url}" target="_blank" class="edit" contenteditable="false" 
+         style="display:inline-block;padding:15px 35px;background:linear-gradient(45deg,var(--primary),var(--accent));color:#000;border:none;border-radius:25px;font-weight:bold;font-size:18px;text-decoration:none;box-shadow:0 10px 30px rgba(0,255,204,0.4);transition:0.3s;">
+        ${text}
+      </a>
+    </div>
+  `);
+  loadEditor();
+  saveHistory();
+  document.getElementById('status').textContent='✅ 🔗 LINK BUTTON added & WORKING!';
+}
+
+function addText(){
+  pages[currentPage].push('<h3 class="edit" contenteditable="true" style="color:var(--primary);">New Text Block</h3><p class="edit" contenteditable="true">Your content here...</p>');
+  loadEditor();saveHistory();document.getElementById('status').textContent='📝 Text added';
+}
+
+function addHeading(){
+  const t=prompt('Heading text:','Your Title')||'Your Title';
+  pages[currentPage].push(`<h2 class="edit" contenteditable="true" style="color:var(--primary);font-size:36px;text-align:center;">${t}</h2>`);
+  loadEditor();saveHistory();
+}
+
+function addImage(){
+  const i=document.createElement('input');
+  i.type='file';i.accept='image/*';
+  i.onchange=e=>{
+    const f=e.target.files[0];
+    if(f.size>8*1024*1024){alert('❌ Max 8MB');return;}
+    const r=new FileReader();
+    r.onload=ev=>{
+      pages[currentPage].push(`<div style="text-align:center;"><img class="edit" src="${ev.target.result}" style="max-width:100%;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.5);"></div>`);
+      loadEditor();saveHistory();
+    };
+    r.readAsDataURL(f);
+  };
+  i.click();
+}
+
+function addButton(){
+  const t=prompt('Button text:','Click Me')||'Click Me';
+  pages[currentPage].push(`<div style="text-align:center;"><button class="edit" style="padding:12px 25px;background:linear-gradient(45deg,var(--primary),var(--accent));color:#000;border:none;border-radius:20px;font-weight:bold;cursor:pointer;" onclick="alert('✅ Button works!')">${t}</button></div>`);
+  loadEditor();saveHistory();
+}
+
+function loadEditor(){
+  const e=document.getElementById('editor');
+  e.innerHTML='';
+  pages[currentPage].forEach((h,i)=>{
+    const d=document.createElement('div');
+    d.className='builder-section';
+    d.innerHTML=h+'<button class="delete" onclick="deleteSection('+i+')">×</button>';
+    d.querySelectorAll('.edit').forEach(el=>{
+      el.onclick=function(ev){
+        if(selected)selected.classList.remove('selected');
+        selected=ev.target;selected.classList.add('selected');
+        document.getElementById('status').textContent='✏️ Selected: '+el.tagName;
+      };
+    });
+    e.appendChild(d);
+  });
+}
+
+function deleteSection(i){
+  pages[currentPage].splice(i,1);
+  loadEditor();
+  saveHistory();
+  document.getElementById('status').textContent='🗑️ Block deleted';
+}
+
+function setColor(c){
+  if(selected){selected.style.color=c;document.getElementById('colorPicker').value=c;saveHistory();}
+}
+
+function setSize(s){
+  if(selected){selected.style.fontSize=s+'px';saveHistory();}
+}
+
+function setAlign(a){
+  if(selected){selected.style.textAlign=a;saveHistory();}
+}
+
+function togglePreview(){
+  const f=document.getElementById('previewFrame'),e=document.getElementById('editor'),b=document.getElementById('previewBtn');
+  saveCurrent();
+  if(f.classList.contains('hidden')){
+    f.srcdoc=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Preview - Skyt Builder</title><style>:root{--primary:#00ffcc;--accent:#ff00ff;}*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}body{background:linear-gradient(135deg,#111,#1a1a1a);color:#fff;padding:60px 10%;line-height:1.6;}h1,h2,h3{color:var(--primary);}a{display:inline-block;padding:15px 30px;background:linear-gradient(45deg,var(--primary),var(--accent));color:#000;border:none;border-radius:25px;font-weight:bold;font-size:16px;text-decoration:none;box-shadow:0 8px 25px rgba(0,255,204,0.3);transition:0.3s;}a:hover{transform:translateY(-2px);box-shadow:0 12px 35px rgba(0,255,204,0.4);}button{padding:15px 30px;background:linear-gradient(45deg,var(--primary),var(--accent));color:#000;border:none;border-radius:25px;font-weight:bold;cursor:pointer;}img{max-width:100%;border-radius:15px;}</style></head><body><h1>${currentPage.charAt(0).toUpperCase()+currentPage.slice(1)}</h1>${pages[currentPage].join('')}</body></html>`;
+    f.classList.remove('hidden');
+    e.style.display='none';
+    b.textContent='✏️ Back to Edit';
+  }else{
+    f.classList.add('hidden');
+    e.style.display='block';
+    b.textContent='👁️ Preview';
+  }
+}
+
+function exportSite(){
+  saveCurrent();
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>My Website - Skyt Builder</title><style>:root{--primary:#00ffcc;--accent:#ff00ff;}*{box-sizing:border-box;font-family:'Poppins',sans-serif;margin:0;padding:0;}body{background:linear-gradient(135deg,#111,#1a1a1a);color:#fff;line-height:1.6;padding:60px 10%;}h1,h2,h3{color:var(--primary);}a{display:inline-block;padding:15px 30px;background:linear-gradient(45deg,var(--primary),var(--accent));color:#000;border:none;border-radius:25px;font-weight:bold;font-size:16px;text-decoration:none;box-shadow:0 8px 25px rgba(0,255,204,0.3);}button{padding:15px 30px;background:linear-gradient(45deg,var(--primary),var(--accent));color:#000;border:none;border-radius:25px;font-weight:bold;cursor:pointer;}img{max-width:100%;border-radius:15px;}</style></head><body>${pages.home.join('')}${pages.about.length?'<h2>About</h2>'+pages.about.join(''):''}${pages.contact.length?'<h2>Contact</h2>'+pages.contact.join(''):''}<footer style="text-align:center;margin-top:60px;padding:30px;background:#000;color:#888;"><small>Created with Skyt Builder by Shakthi Krishna © 2026</small></footer></body></html>`;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download='skyt-website.html';
+  a.click();
+  document.getElementById('status').textContent='🎉 Website exported!';
+}
+
+window.onload=function(){saveHistory();};
+</script>
+</body>
+</html>
